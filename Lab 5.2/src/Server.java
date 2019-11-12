@@ -10,7 +10,7 @@ public class Server {
 	
 	public static void main (String [] args) throws IOException 
 	{
-		ServerSocket ss = new ServerSocket(4100);
+		ServerSocket ss = new ServerSocket(4101);
 		Socket s = ss.accept();
 		
 		
@@ -18,12 +18,14 @@ public class Server {
 		
 		InputStreamReader in = new InputStreamReader(s.getInputStream());
 		BufferedReader bf = new BufferedReader(in);
+		map();
 		
 		String str = bf.readLine();
-		
-		map();
-		String[] inputArray = str.split("\\s");
-		translate(inputArray);
+		while(str != null) {
+			String[] inputArray = str.split("\\s");
+			translate(inputArray);
+			str = bf.readLine();
+		}
 		
 		s.close();
 		ss.close();
@@ -33,7 +35,6 @@ public class Server {
 	
 	public static void map() throws FileNotFoundException 
 	{
-		//System.out.println("Does this still work?");
 		try {
 			
 		Scanner scan = new Scanner(new File("H:\\git\\repository\\Lab 5.2\\src\\dictionary.txt"));
@@ -62,18 +63,25 @@ public class Server {
 	
 	public static void translate(String[] input)
 	{
+		int it = 0;
+		indexFound.clear();
 		for(int i = 0 ; i < input.length; i++)
-		{	
+		{
+			boolean found = false;
 			input[i] = input[i].replaceAll("[-+.^:,?]","");
 			
 			for(int index = 0; index < key.size(); index++)
 			{
-				if(input[i].equalsIgnoreCase(key.get(index)))
+				if(equals(input[i],key.get(index)))
 				{
-					indexFound.add(value.get(index));
+					it = index;
+					found = true;
 					break;
 				}
 			}
+			
+			if(found){ indexFound.add(value.get(it)); }
+			else { indexFound.add(input[i]); }
 		}
 		
 		printResults();
@@ -81,11 +89,29 @@ public class Server {
 	
 	public static void printResults()
 	{
-		for(int i = 0 ; i<indexFound.size(); i++)
+		if(indexFound.isEmpty())
 		{
-			System.out.print(indexFound.get(i)+" ");
+			System.out.println("No matches were found");
 		}
-			
+		else
+		{
+			for(int i = 0 ; i<indexFound.size(); i++)
+				{
+					System.out.print(indexFound.get(i)+" ");
+				}
+			System.out.println();
+		}	
+	}
+	
+	public static boolean equals(String input, String key)
+	{
+		if(input.equalsIgnoreCase(key)) {
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 	
 }
